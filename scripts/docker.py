@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# originaly from 
+# originaly from
 import os
 import json
 import argparse
@@ -22,6 +22,12 @@ def discover():
 			ps = {}
 			ps["{#CONTAINERNAME}"] = line.strip().split()[0]
 			ps["{#CONTAINERID}"] = line.strip().split()[1]
+			_cmd = 'docker inspect -s -f "{{.GraphDriver.Data.DeviceName}}" '+ ps["{#CONTAINERID}"]
+			with os.popen(_cmd) as dpipe:
+				c = 0
+				for line in dpipe:
+					ps["{#COMTAINERMAPID%d}"%c] = line.strip().split("-")[-1]
+					c+=1
 			d["data"].append(ps)
 	print (json.dumps(d))
 
@@ -51,7 +57,7 @@ def status(args):
 	elif status == 'dead':
 		print ("6")
 	else: print ("0")
-	
+
 # get the uptime in seconds, if the container is running
 def uptime(args):
 	with os.popen("docker inspect -f '{{json .State}}' " + args.container + " 2>&1") as pipe:
